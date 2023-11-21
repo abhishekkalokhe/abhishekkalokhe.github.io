@@ -1,12 +1,53 @@
 <!DOCTYPE html>
-
-<html>
 <head>
-	<title>Abhishek Kalokhe</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
+    <meta charset="utf-8">
+    <title>Music Recommender</title>
 </head>
+
 <body>
-	<h1>
-	Hello World
-	</h1>
+  <script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+  <script type="text/javascript" src="../lib/d3-tip.min.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+
+  <div>
+    <link href="./home.css" rel="stylesheet" />
+    <div class="home-container">
+      <header data-role="Header" class="home-header">
+        <h1 class="home-text">Music Recommender</h1>
+        <div class="home-nav">
+          <nav class="navigation-links-nav navigation-links-root-class-name15">
+            <a href="index.html" class="navigation-links-navlink">
+              <span>Recommender</span>
+            </a>
+            <a href="insights.html" class="navigation-links-navlink1">
+              <span>Insights</span>
+            </a>
+          </nav>
+        </div>
+      </header>
+    </div>
+  </div>
+
+<label>Select a user:</label>
+<select class="select_artists" id="artists"></select>
+<button id = "search">Search</button>
+
+<br><br>
+<div id="top_artists">Select from any of the top artists:
+<br><br>
+</div>
+<br><br>
+
+<div class="slider-container">
+<div class="slider-text">Number of similar artists</div>
+<div>
+    <input type="range" min="1" max="25" value="5" class="slider" id="similar_count_slider">
+    <span class="slider-label slider-min">1</span>
+    <span class="slider-label slider-max">25</span>
+</div>
+</div>
+
 </body>
 </html>

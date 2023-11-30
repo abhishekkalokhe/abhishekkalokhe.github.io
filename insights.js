@@ -261,7 +261,7 @@
     });
 
 
-    fetch('data/song_genre_year.csv')
+    fetch('data/songs_details.csv')
     .then(response => response.text())
     .then(data => {
       // Process the CSV data
@@ -289,8 +289,8 @@
           var values = rows[i].split(',');
           //console.log(values);
           // Assuming 'tempo', 'loudness', 'title', 'genre', and 'year' are columns in your CSV
-          var genre = values[2];  // Replace with the correct index for 'genre'
-          var year = parseInt(values[53]);  // Replace with the correct index for 'year'
+          var genre = values[0];  // Replace with the correct index for 'genre'
+          var year = parseInt(values[13]);  // Replace with the correct index for 'year'
           //console.log(year, genre);
 
           if (genre !== undefined) {
@@ -377,9 +377,9 @@
 
       for (let i = 1; i < rows.length; i++) {
         const values = rows[i].split(',');
-        const artist = values[12];
-        const hotness = parseFloat(values[7]);
-        const year = parseInt(values[53]);
+        const artist = values[2];
+        const hotness = parseFloat(values[4]);
+        const year = parseInt(values[13]);
 
         if (artist === selectedArtist && !isNaN(hotness) && !isNaN(year)) {
           if (!hotnessByYear[year]) {
@@ -400,14 +400,15 @@
     }
 
       // Fetch the CSV file
-      fetch('data/song_genre_year.csv')
+      fetch('data/songs_details.csv')
+
         .then(response => response.text())
         .then(csvData => {
           const artists = new Set();
           const rows = csvData.split('\n');
           for (let i = 1; i < rows.length; i++) {
             const values = rows[i].split(',');
-            artists.add(values[12]);
+            artists.add(values[2]);
           }
 
           const artistDropdown = document.getElementById('artistDropdown');
@@ -431,9 +432,10 @@
             };
 
             const layout = {
-              title: `Average Hotness for ${selectedArtist}`,
+              title: `Average Artist Hotness for ${selectedArtist}`,
               xaxis: { title: 'Year' },
-              yaxis: { title: 'Average Hotness' },
+              yaxis: { title: 'Average Hotness', range: [0.0,1.0]  },
+
             };
 
             const data = [trace];
@@ -452,9 +454,11 @@
           };
 
           const layout = {
-            title: `Average Hotness for ${firstArtist}`,
-            xaxis: { title: 'Year' },
-            yaxis: { title: 'Average Hotness' },
+
+            title: `Average Artist Hotness for ${firstArtist}`,
+            xaxis: { title: 'Year'},
+            yaxis: { title: 'Average Hotness', range: [0.0,1.0] }
+
           };
 
           const data = [trace];

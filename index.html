@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css">
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="d3tip.css">
     <meta charset="utf-8">
     <title>Music Recommender</title>
 </head>
@@ -18,7 +18,7 @@
       <header data-role="Header" class="home-header">
         <h1 class="home-text">Music Recommender</h1>
         <div class="home-nav">
-          <nav class="navigation-links-nav navigation-links-root-class-name15">
+          <nav class="navigation-links-nav">
             <a href="index.html" class="navigation-links-navlink">
               <span>Recommender</span>
             </a>
@@ -31,24 +31,36 @@
     </div>
   </div>
 
-<label>Select a user:</label>
-<select class="select_artists" id="artists"></select>
-<button id = "search">Search</button>
+  <div class="center-container">
+    <label>Select a user:</label>
+    <select class="select_user" id="user"></select>
+    <button id="search">Search</button>
+  </div>
 
-<br><br>
-<div id="top_artists">Select from any of the top artists:
-<br><br>
-</div>
-<br><br>
 
-<div class="slider-container">
-<div class="slider-text">Number of similar artists</div>
-<div>
-    <input type="range" min="1" max="25" value="5" class="slider" id="similar_count_slider">
-    <span class="slider-label slider-min">1</span>
-    <span class="slider-label slider-max">25</span>
-</div>
-</div>
+  <br><br>
+  <div id="topSongsListContainer">
+    <label> Top songs </label>
+    <div id="topSongsList"></div> 
+  </div>
+  <br><br>
+  <div class="slider-container">
+    <div class="slider-text">Number of similar songs
+      <div class="slider-value-box">
+        <span id="slider-value">5</span>
+      </div>
+ 
+    </div>
+    
+    <div>
+      <span class="slider-label slider-min">1</span>
+      <input type="range" min="1" max="10" value="5" class="slider" id="similar_count_slider">
+      <span class="slider-label slider-max">10</span>
 
+    </div>
+  </div>
+
+  
 </body>
+
 </html>

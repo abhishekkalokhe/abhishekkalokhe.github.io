@@ -39,18 +39,23 @@
   
     </div>
   
-  
+  <div class="dropdown">
     <label for="year-dropdown"><b>Select a year:</b></label>
     <select id="year-dropdown"></select>
-    <div id='scatterplot'></div>
+    <div id='scatterplot' class="plotly-plot"></div>
+  </div>
+  
+  <hr>
+
+    <div id="myDiv" class="plotly-plot"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <hr>
+    <div id="stackedbar" class="plotly-plot"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <hr>
     
-    <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-    <div id="stackedbar"><!-- Plotly chart will be drawn inside this DIV --></div>
-    
-    <div>
+    <div class="dropdown">
       <label for="artistDropdown"><b>Select an artist:</b></label>
       <select id="artistDropdown"></select>
     </div> 
-    <div id="linechart"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <div id="linechart" class="plotly-plot"><!-- Plotly chart will be drawn inside this DIV --></div>
   </body>
   </html>

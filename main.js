@@ -1,6 +1,6 @@
 var song_similarity_csv = 'data/song_similarity_recommendations_500k.csv';
 var user_recommendations_csv = 'data/user_song_recommendations_500k.csv';
-var nodes_csv = 'data/updated_file.csv';
+var nodes_csv = 'data/songs_details.csv';
 var user_top_played_csv='data/user_top_played_songs.csv';
 
 // SVG Dimensions
@@ -20,7 +20,7 @@ const colors = {
     'DEFAULT': '#2E64A2',
     'EXPANDED': '#95D134'
 };
-var nodes, edges, edges1, edges2, user_topsongs,allNodesMap, songEdges;
+var nodes, edges, edges1, edges2, user_topsongs, allUsersMap, allNodesMap, songEdges;
 var sliderValue;
 var graphData, graph, selectedSong, graphDataMap, recommendationsDiv;
 var recommendations = [];
@@ -53,10 +53,12 @@ Promise.all([
         return {
             song_id: node.song_id,
             song_name: node.title,
-            // avg_duration: parseFloat(node.avg_duration),
-            // avg_familiarity: parseFloat(node.avg_familiarity),
+            genre: node.genre,
+            artist_name: node.artist_name,
+            year: parseInt(node.year),
             song_hotness: isNaN(parseFloat(node.song_hotttnesss)) ? 0 : parseFloat(node.song_hotttnesss), //isNaN(parseFloat(row[columnIndex])) ? 0 : parseFloat(row[columnIndex])
-            // total_tracks: parseInt(node.total_tracks)
+            
+            label: 0
         };
     }),
     d3.dsv(",", user_top_played_csv, function (utp) {
@@ -64,7 +66,9 @@ Promise.all([
             user_id: utp.user_id,
             song_id: utp.song_id,
             song_name: utp.title,
-            listen_count: parseInt(utp.listen_count)
+            listen_count: parseInt(utp.listen_count),
+            user_name: utp.fake_name,
+            label: 1
         };
     })
 ]).then(allData => {
@@ -74,6 +78,23 @@ Promise.all([
     user_topsongs=allData[3]; //user top song data
     //console.log(user_topsongs)
     edges = edges1.concat(edges2);
+
+    const uniqueUsers = Array.from(new Set(user_topsongs.map(item => JSON.stringify({ user_id: item.user_id, user_name: item.user_name, label: item.label })))).map(JSON.parse);
+    //console.log(uniqueUsers);
+    const users_array = uniqueUsers.map(item => {
+        const newItem = { ...item, id: item.user_id };
+        delete newItem.user_id;
+        return newItem;
+      });
+    //console.log(users_array);
+
+    allUsersMap = uniqueUsers.reduce((obj, item, idx) => {
+        item['index'] = idx;
+        item.children = null;
+        obj[item['user_id']] = item;
+        return obj;
+    }, {}); // map for quick lookup of user nodes by id
+
 
     allNodesMap = nodes.reduce((obj, item, idx) => {
         item['index'] = idx;
@@ -97,7 +118,8 @@ Promise.all([
         .append("div")
         .attr("id", "recommendations-div")
     // Show initial network of song based on selected song (How many neighbors to show in the beginning?)
-    selectedSong = nodes[152799];
+    // selectedSong = nodes[152799];
+    selectedSong = uniqueUsers[0];
     sliderValue = 5;
 
     fetchGraphData(selectedSong);
@@ -109,18 +131,18 @@ Promise.all([
     var selectTag = d3.select("select");
 
     var options = selectTag.selectAll('#select_user')
-        .data(nodes.slice(152800, 152900));
+        .data(uniqueUsers.slice(0,100));
 
     options.enter()
         .append('option')
         .attr('value', function (d) {
-            return d.song_id;
+            return d.user_id;
         })
         .attr('id', function (d) {
-            return d.song_id;
+            return d.user_id;
         })
         .text(function (d) {
-            return d.song_id
+            return d.user_name
         });
     /*
     search.addEventListener("click", function () {
@@ -140,8 +162,8 @@ Promise.all([
     */
     document.getElementById("search").addEventListener("click", function () {
         var e = document.getElementById("user");
-        var text = e.options[e.selectedIndex].text;
-        selectedSong = allNodesMap[text]; // Fix: Use text directly as the key
+        var text = e.options[e.selectedIndex].id;
+        selectedSong = allUsersMap[text]; // Fix: Use text directly as the key
         recommendations = [];
         clearGraph();
         fetchGraphData(selectedSong);
@@ -244,13 +266,24 @@ function buildGraphDataMap(currentMap) {
 function fetchGraphData(selectedSong) {
     selectedSong.children = [];
     graphData = [selectedSong];
-    songEdges = getSongNetwork(selectedSong['song_id'], sliderValue);
-    songEdges.forEach(edge => {
-        var target = allNodesMap[edge['target']];
-        graphData.push(target);
-        selectedSong.children.push(target);
-        recommendations.push(target);
-    });
+    if (selectedSong.user_id){
+        songEdges = getSongNetwork(selectedSong['user_id'], sliderValue);
+        songEdges.forEach(edge => {
+            var target = allNodesMap[edge['target']];
+            graphData.push(target);
+            selectedSong.children.push(target);
+            recommendations.push(target);
+        });
+    }
+    else{
+        songEdges = getSongNetwork(selectedSong['song_id'], sliderValue);
+        songEdges.forEach(edge => {
+            var target = allNodesMap[edge['target']];
+            graphData.push(target);
+            selectedSong.children.push(target);
+            recommendations.push(target);
+        });
+    }
 }
 
 /**
@@ -259,7 +292,16 @@ function fetchGraphData(selectedSong) {
  * @returns 
  */
 function getTooltipStats(hoveredNode) {
-    return "Song Name: " + hoveredNode['song_name'];
+    if (hoveredNode.user_id){
+        return "User Name: " + hoveredNode['user_name'];
+    }
+    else{
+        return "Song Name: " + hoveredNode['song_name'] + 
+        "<br> Artist Name: " + hoveredNode['artist_name'] +
+        "<br> Genre: " + hoveredNode['genre'] +
+        "<br> Year: " + parseInt(hoveredNode['year'])+
+        "<br> Hotness: " + parseFloat(hoveredNode['song_hotness']).toFixed(2);
+    }
     // "<br> Average Duration: " + parseFloat(hoveredNode['avg_duration']).toFixed(2) +
     // "<br> Average Hotness: " + parseFloat(hoveredNode['avg_hotness']).toFixed(2) +
     // "<br> Average Familiarity: " + parseFloat(hoveredNode['avg_familiarity']).toFixed(2) +
@@ -268,11 +310,11 @@ function getTooltipStats(hoveredNode) {
 
 /**
  * To get the similar artist network from list of edges
- * @param song_id: id of the artist to find the network for
+ * @param source_id: id of the artist to find the network for
  * @param count: number of similar artists to return sorted by priority
  */
-function getSongNetwork(song_id, count = 9) {
-    let filtered = edges.filter(edge => edge['source'] === song_id);
+function getSongNetwork(source_id, count = 9) {
+    let filtered = edges.filter(edge => edge['source'] === source_id);
 
     //create a deep copy of the edges because forceSimulation modifies these edges
     let neighbors = JSON.parse(JSON.stringify(filtered))
@@ -325,7 +367,14 @@ function drawGraph() {
         force.stop();
     force = d3.forceSimulation()
         .nodes(d3.values(graphDataMap))
-        .force("link", d3.forceLink(songEdges).id(d => d['song_id']).distance(150).strength(0.1))
+        .force("link", d3.forceLink(songEdges).id((d) => {
+            if (d.user_id) {
+                return d['user_id'];
+            }
+            else{
+                return d['song_id'];
+            }
+            }).distance(150).strength(0.1))
         .force('center', d3.forceCenter(networkGraphWidth / 2, networkGraphHeight / 2))
         .force("x", d3.forceX())
         .force("y", d3.forceY())
@@ -405,7 +454,7 @@ function drawGraph() {
           return radiusScale(d.song_hotness);
         })
         */
-        .attr("r", 5)
+        .attr("r", 8)
         .attr("fill", (d) => {
             if (topNodes.includes(d)) {
                 return topCircleColor;
@@ -426,7 +475,13 @@ function drawGraph() {
         .attr("x", 10)
         .attr("y", -5)
         .text(function (d) {
-            return (d.song_name);
+            if (d.user_id){
+                return (d.user_name);
+            }
+            else{
+                return (d.song_name);
+            }
+            
         });
 
     force.alpha(0.1).restart()
@@ -503,7 +558,7 @@ function update(d) {
     } else {
         // get data of similar artists
         expandedSongs.push(d);
-        console.log("update_1", expandedSongs, d);
+        // console.log("update_1", expandedSongs, d);
         let newSongEdges = getSongNetwork(d['song_id'], sliderValue);
         d.children = [];
         newSongEdges.forEach(edge => {

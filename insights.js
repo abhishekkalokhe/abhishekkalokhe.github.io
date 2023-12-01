@@ -423,6 +423,7 @@
             const selectedArtist = this.value;
             const processedData = processData2(csvData, selectedArtist);
 
+            const allYears=processedData.map(item=>item.year);
             const trace = {
               x: processedData.map(item => item.year),
               y: processedData.map(item => item.averageHotness),
@@ -433,7 +434,12 @@
 
             const layout = {
               title: `Average Artist Hotness for ${selectedArtist}`,
-              xaxis: { title: 'Year' },
+              xaxis: { 
+              title: 'Year',
+              tickvals: allYears,
+              tickmode: 'array',
+              tickformat: 'd',
+              },
               yaxis: { title: 'Average Hotness', range: [0.0,1.0]  },
 
             };
@@ -456,7 +462,9 @@
           const layout = {
 
             title: `Average Artist Hotness for ${firstArtist}`,
-            xaxis: { title: 'Year'},
+            xaxis: {
+            title: 'Year',
+            tickformat: 'd'},
             yaxis: { title: 'Average Hotness', range: [0.0,1.0] }
 
           };
